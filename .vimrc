@@ -114,9 +114,9 @@ set magic               " change the way backslashes are used in search patterns
 set bs=indent,eol,start " Allow backspacing over everything in insert mode
 set nobackup            " no backup~ files.
 
-set tabstop=3           " number of spaces a tab counts for
-set shiftwidth=3        " spaces for autoindents
-set softtabstop=3
+set tabstop=2           " number of spaces a tab counts for
+set shiftwidth=2        " spaces for autoindents
+set softtabstop=2
 set shiftround          " makes indenting a multiple of shiftwidth
 set expandtab           " turn a tab into spaces
 set laststatus=2        " the statusline is now always shown
@@ -340,3 +340,6 @@ let g:rubycomplete_buffer_loading = 1
 let g:rubycomplete_classes_in_global = 1
 let g:rubycomplete_rails = 1
 let g:rubycomplete_load_gemfile = 1
+
+autocmd Filetype ruby setlocal ts=2 sts=2 sw=2
+autocmd Filetype java setlocal ts=3 sts=3 sw=3
