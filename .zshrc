@@ -2,7 +2,7 @@
 
 # If not running interactively, do not do anything
 [[ $- != *i* ]] && return
-#[[ -z "$TMUX" ]] && tmux attach
+[[ -z "$TMUX" ]] && tmux attach
 #if [ -n "$TMUX" ]; then
 #  PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D" | tr -d %) "$PWD")'
 #fi
@@ -128,7 +128,6 @@ function svc_build() {
 }
 
 
-VI=/usr/local/bin/vim
 DEF_SERVICES=("account" "asset" "benefits"
               "careteam" "cigna" "classifier"
               "coe" "configurator" "content"
@@ -148,7 +147,7 @@ function logs() {
    for log in $services; do
       path="$path $SOA_HOME/services/${log}service/output/logs/${log}service.log"
    done
-   $VI -pR $path
+   $EDITOR -pR $path
 }
 
 # Usage:
