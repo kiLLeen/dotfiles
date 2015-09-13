@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Increase limit on files open per process
 ulimit -n 4096
 
@@ -15,18 +17,22 @@ export JAVA_OPTS="-Djava.awt.headless=true"
 
 
 # Set up environment variables for Castlight Java development
-pushd $SOAS_HOME
-source castlight_env.sh
-popd
+if [ -d "$SOAS_HOME" ]; then
+  pushd $SOAS_HOME
+  source castlight_env.sh
+  popd
+fi
 
 
 # Set up rvm and ruby
-export PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+if [ -d "$HOME/rvm" ]; then
+  export PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+  rvm use ruby-2.1.2
+fi
+
 
 export PATH=/usr/local/bin:$PATH
 export USE_ARTIFACTORY=1
-
-rvm use ruby-2.1.2
-
 echo ".zprofile loaded"

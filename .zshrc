@@ -1,6 +1,11 @@
+#!/bin/zsh
+
 # If not running interactively, do not do anything
 [[ $- != *i* ]] && return
-[[ -z "$TMUX" ]] && tmux attach || tmux new
+#[[ -z "$TMUX" ]] && tmux attach
+#if [ -n "$TMUX" ]; then
+#  PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D" | tr -d %) "$PWD")'
+#fi
 
 # don't put dupliacate lines or lines that start with a blank space in the history. See bash(1)
 export HISTCONTROL=ignoreboth
@@ -28,7 +33,6 @@ alias ports='netstat -tulap tcp'
 alias durev='du -s * | sort -rn'
 alias httpdreload='sudo /usr/sbin/apachectl -k graceful'
 alias t='tmux attach || tmux'
-PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D" | tr -d %) "$PWD")'
 alias psgrep='ps aux | grep -v grep | grep "$@" -i --color=auto'
 alias hgrep='h | grep --color=auto'
 alias mostused='cut -f1 -d" " ~/.bash_history | sort | uniq -c | sort -nr | head -n 30'
@@ -240,37 +244,6 @@ function trash () {
   done
 }
 
-#-----------------------------
-# Machine Specific Functions
-# i.e., may require additional setup of MySQL, Python, Java, Git, etc.
-#-----------------------------
-
-function find_git_branch {
-  local dir=.  head
-  until [ "$dir" -ef / ]; do
-    if [ -f "$dir/.git/HEAD" ]; then
-      head=$(< "$dir/.git/HEAD")
-      if [[ $head == ref:\ refs/heads/* ]]; then
-        git_branch="[${head##*/}]"
-      elif [[ $head != '' ]]; then
-        git_branch='[detached]'
-      else
-        git_branch='[unknown]'
-      fi
-      return
-    fi
-    dir="../$dir"
-  done
-  git_branch=''
-}
-
-PROMPT_COMMAND="find_git_branch; $PROMPT_COMMAND"
-
-# Show all git branches by last modified date
-function last_branch_commit() {
-  for k in `git branch -r|perl -pe s/^..//`;do echo -e `git show --pretty=format:"%Cgreen%ci Cblue%cr%Creset" $k|head -n 1`\\t$k;done|sort  
-}
-
 # Lists 10 branches with the most recent commits on them by any author
 function recent_branches {
   git for-each-ref --sort=-committerdate refs/heads/ | head -${1:-10}
@@ -315,7 +288,7 @@ function geocode() {
 }
 
 # Path to your oh-my-zsh installation.
-export ZSH=/Users/nkilleen/.oh-my-zsh
+export ZSH=$HOME/.oh-my-zsh
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
@@ -361,13 +334,15 @@ ZSH_THEME="flazz"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git theme tmux)
 
 # User configuration
 # /Users/nkilleen/.rvm/gems/ruby-2.1.2/bin:/Users/nkilleen/.rvm/gems/ruby-2.1.2@global/bin:/Users/nkilleen/.rvm/rubies/ruby-2.1.2/bin:
 # export MANPATH="/usr/local/man:$MANPATH"
 
-source $ZSH/oh-my-zsh.sh
+if [ -d "$ZSH" ]; then
+  source $ZSH/oh-my-zsh.sh
+fi
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
