@@ -214,6 +214,7 @@ set formatoptions=tcroqnj
 
 nnoremap <leader>[ :diffget //2<CR>
 nnoremap <leader>] :diffget //3<CR>
+nnoremap <leader>w :%s/\s\+$//<CR>
 
 map <c-w>t :$tabedit <c-r>%<cr>
 
@@ -298,9 +299,12 @@ let g:snips_author                 = 'Neil Killeen'
 "                                Eclim                                    "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:EclimCompletionMethod = 'omnifunc'
-nnoremap <silent> <buffer> <leader>m :JavaImport<cr>
-nnoremap <silent> <buffer> <leader>d :JavaDocSearch -x declarations<cr>
+nnoremap <leader>i :JavaImportO<cr>
+nnoremap <leader>d :JavaDocSearch -x declarations<cr>
 nnoremap <silent> <buffer> <cr> :JavaSearchContext<cr>
+nnoremap <leader>r :JavaRename 
+nnoremap <leader>m :JavaMove 
+nnoremap <leader>g :JavaGet<cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                             NumberToggle                                "

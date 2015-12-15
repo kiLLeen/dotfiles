@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 
 # If not running interactively, do not do anything
 [[ $- != *i* ]] && return
@@ -105,6 +105,24 @@ alias mysql_stop="/Library/StartupItems/MySQLCOM/MySQLCOM stop"
 # Portable Functions
 #-----------------------------------
 
+function gitlines() {
+  local temp_ifs=$IFS;
+  IFS="|"
+
+  local args="$*"
+
+  LC_ALL="C" git ls-tree -r HEAD | \
+    sed -re 's/^.{53}//' | \
+    while read filename; do file "$filename"; done | \
+      grep -E ".*\.(${args})" | \
+      sed -r -e 's/: .*//' | \
+      while read filename; do git blame -w "$filename"; done | \
+        sed -r -e 's/.*\((.*)[0-9]{4}-[0-9]{2}-[0-9]{2} .*/\1/' -e 's/ +$//' | \
+        sort -gif | uniq -c
+
+  IFS=${temp_ifs}
+}
+
 # cd's up directory path by the specified number of levels. Defaults to 1.
 function ..() {
   local arg=${1:-1};
@@ -127,27 +145,22 @@ function svc_build() {
   $SOAS_HOME/sysdefs/bin/svc.sh $@ kill,clean,clean-deploy,upgrade
 }
 
-
-DEF_SERVICES=("account" "asset" "benefits"
-              "careteam" "cigna" "classifier"
-              "coe" "configurator" "content"
-              "drug" "email" "event"
-              "inbox" "instrumentation" "management"
-              "pastcare" "pricing"
-              "providerdetail" "providerdirectory" "proxy"
-              "reviews" "reward" "search")
 function logs() {
-   local path
+   local defaultservices=$(find ${SOA_HOME}/services -iregex '.*service' -depth 1 | sed 's/^\(.*[\\\/]\)//g' | sed 's/service//g')
+   local fullpath
    local services
+   local currentlogpath
+
    if [ $# -gt 0 ]; then
       services=$*
    else
-      services=${DEF_SERVICES[*]}
+      services=${defaultservices[*]}
    fi
    for log in $services; do
-      path="$path $SOA_HOME/services/${log}service/output/logs/${log}service.log"
+     currentlogpath="$SOA_HOME/services/${log}service/output/logs"
+     fullpath="$fullpath $currentlogpath/${log}service.log $currentlogpath/catalina.log"
    done
-   $EDITOR -pR $path
+   $EDITOR -pR $fullpath
 }
 
 # Usage:
