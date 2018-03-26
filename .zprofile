@@ -24,15 +24,6 @@ if [ -d "$SOAS_HOME" ]; then
 fi
 
 
-# Set up rvm and ruby
-if [ -d "$HOME/rvm" ]; then
-  export PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
-
-  rvm use ruby-2.1.2
-fi
-
-
 export PATH=/usr/local/bin:$PATH
 export USE_ARTIFACTORY=1
 

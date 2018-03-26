@@ -46,6 +46,7 @@ alias svcb=svc_build
 alias prodsys='cd ~/Projects/Ventana/prodsys'
 alias act='cd ~/Projects/Ventana/action'
 alias vent='cd ~/Projects/Ventana/ventana'
+alias proz='cd ~/Projects/Ventana/prozor'
 alias soa='cd ~/Projects/Ventana/soa-systems'
 alias sc='script/console'
 alias acp='ant clean provide'
@@ -158,7 +159,7 @@ function logs() {
    fi
    for log in $services; do
      currentlogpath="$SOA_HOME/services/${log}service/output/logs"
-     fullpath="$fullpath $currentlogpath/${log}service.log $currentlogpath/catalina.log"
+     fullpath+=("$currentlogpath/${log}service.log")
    done
    $EDITOR -pR $fullpath
 }
@@ -349,7 +350,6 @@ ZSH_THEME="flazz"
 plugins=(git theme tmux)
 
 # User configuration
-# /Users/nkilleen/.rvm/gems/ruby-2.1.2/bin:/Users/nkilleen/.rvm/gems/ruby-2.1.2@global/bin:/Users/nkilleen/.rvm/rubies/ruby-2.1.2/bin:
 # export MANPATH="/usr/local/man:$MANPATH"
 
 if [ -d "$ZSH" ]; then
@@ -381,4 +381,8 @@ export EDITOR='vim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+export PATH="/usr/local/opt/node@6/bin:$PATH"
+export PATH="/usr/local/opt/percona-server@5.6/bin:$PATH"
+export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
+export PATH="$HOME/.rbenv/bin:$PATH"
 echo ".zshrc loaded"

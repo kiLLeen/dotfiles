@@ -4,7 +4,8 @@
 "                                preamble                                 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-set shell=/usr/local/bin/zsh\ --rcs
+"set shell=/usr/local/bin/zsh\ --rcs
+set shell=/bin/sh
 
 " Needed for vundle, will be turned on after vundle inits
 set nocompatible
@@ -22,21 +23,30 @@ call vundle#begin()
 " the plugin's Plugin command.
 
 Plugin 'gmarik/Vundle.vim'
-Plugin 'vim-scripts/taglist.vim'
-Plugin 'bling/vim-airline'
-Plugin 'SirVer/ultisnips'
+"Plugin 'vim-scripts/taglist.vim'
+"Plugin 'bling/vim-airline'
+"Plugin 'SirVer/ultisnips'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'jeffkreeftmeijer/vim-numbertoggle'
 "Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'Valloric/YouCompleteMe'
+"Plugin 'Valloric/YouCompleteMe'
 "Plugin 'fatih/vim-go'
-Plugin 'majutsushi/tagbar'
-Plugin 'mileszs/ack.vim'
+"Plugin 'majutsushi/tagbar'
+"Plugin 'mileszs/ack.vim'
 Plugin 'tpope/vim-fugitive'
-Plugin 'kien/ctrlp.vim'
+Plugin 'tpope/vim-repeat'
+Plugin 'tpope/vim-vinegar'
+Plugin 'tpope/vim-bundler'
+Plugin 'tpope/vim-projectionist'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-haml'
 Plugin 'tpope/vim-rails'
+Plugin 'kien/ctrlp.vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'vim-ruby/vim-ruby'
+Plugin 'leafgarland/typescript-vim'
+Plugin 'nixprime/cpsm'
+Plugin 'jremmen/vim-ripgrep'
 
 call vundle#end()
 filetype plugin indent on
@@ -172,7 +182,7 @@ set undodir=~/tmp,/var/tmp,/tmp,$TEMP
 " Look for tag def in a "tags" file in the dir of the current file, then for
 " that same file in every folder above the folder of the current file, until the
 " root.
-set tags=libraries/tags,tags
+set tags=libraries/tags,tags,../node_modules/tags
 map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 nnoremap <c-tab> :tabn<CR>
@@ -201,13 +211,21 @@ set gdefault            " this makes search/replace global by default
 " enforces a specified line-length and auto inserts hard line breaks when we
 " reach the limit; in Normal mode, you can reformat the current paragraph with
 " gqap.
-set textwidth=80
+set textwidth=0
+set wrapmargin=0
 
 " this makes the color after the textwidth column highlighted
 set colorcolumn=+1
 
 " options for formatting text; see :h formatoptions
 set formatoptions=tcroqnj
+
+set clipboard=unnamed
+
+" Relative paths in insert mode (doesn't always work)
+"autocmd InsertEnter * let save_cwd = getcwd() | set autochdir
+"autocmd InsertLeave * set noautochdir | execute 'cd' fnameescape(save_cwd)
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                            custom mappings                              "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -313,7 +331,9 @@ let g:NumberToggleTrigger="<F2>"
 
 " Control P
 let g:ctrlp_working_path_mode = 0
-"let g:ctrlp_user_command = 'find %s -type f'
+let g:ctrlp_user_command = 'rg %s --files --color=never --glob ""'
+let g:ctrlp_match_func = { 'match': 'cpsm#CtrlPMatch' }
+let g:ctrlp_use_caching = 0
 let g:ctrlp_custom_ignore = '\v[\/]\.(git|jar|min\.js|class)$'
 let g:ctrlp_max_depth = 40
 let g:ctrlp_max_files = 0
@@ -329,7 +349,7 @@ autocmd InsertLeave * set nocul
 
 "NERDTree
 
-map <C-n> :NERDTreeToggle<CR>
+nnoremap <C-n> :NERDTreeToggle<CR>
 
 "Airline
 
