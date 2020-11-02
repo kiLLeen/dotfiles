@@ -1,4 +1,4 @@
-#!/bin/sh
+source $HOME/.zprofile
 
 # If not running interactively, do not do anything
 [[ $- != *i* ]] && return
@@ -46,14 +46,13 @@ alias svcb=svc_build
 alias prodsys='cd ~/Projects/Ventana/prodsys'
 alias act='cd ~/Projects/Ventana/action'
 alias vent='cd ~/Projects/Ventana/ventana'
-alias proz='cd ~/Projects/Ventana/prozor'
+alias ikkuna='cd ~/Projects/Ventana/ventana/ikkuna'
+alias shared='cd ~/Projects/Ventana/clh-soa-client'
+alias config='cd ~/Projects/Ventana/config_master'
+alias pantry='cd ~/Projects/Ventana/pantry'
+alias mobile='cd ~/Projects/Ventana/phoenix'
 alias soa='cd ~/Projects/Ventana/soa-systems'
 alias sc='script/console'
-alias acp='ant clean provide'
-alias au='ant upgrade'
-alias soabuild='soa; acp'
-alias startsql='sudo cd; sudo mysqld_safe &'
-alias stopsql='sudo mysqladmin -uroot shutdown'
 alias startpg='pg_ctl -D /var/db/pgsql/data -l /var/db/pgsql/server.log start'
 alias stoppg='pg_ctl -D /var/db/pgsql/data stop -s -m fast'
 alias startmongo='mongod --config /etc/mongodb/mongodb.conf'
@@ -108,20 +107,22 @@ alias mysql_stop="/Library/StartupItems/MySQLCOM/MySQLCOM stop"
 
 function gitlines() {
   local temp_ifs=$IFS;
+  local temp_lc_all=$LC_ALL
   IFS="|"
-
+  LC_ALL="C"
   local args="$*"
 
-  LC_ALL="C" git ls-tree -r HEAD | \
-    sed -re 's/^.{53}//' | \
+  git ls-tree -r HEAD | \
+    gsed -re 's/^.{53}//' | \
     while read filename; do file "$filename"; done | \
       grep -E ".*\.(${args})" | \
-      sed -r -e 's/: .*//' | \
+      gsed -r -e 's/: .*//' | \
       while read filename; do git blame -w "$filename"; done | \
-        sed -r -e 's/.*\((.*)[0-9]{4}-[0-9]{2}-[0-9]{2} .*/\1/' -e 's/ +$//' | \
+        gsed -r -e 's/.*\((.*)[0-9]{4}-[0-9]{2}-[0-9]{2} .*/\1/' -e 's/ +$//' | \
         sort -gif | uniq -c
 
   IFS=${temp_ifs}
+  LC_ALL=${temp_lc_all}
 }
 
 # cd's up directory path by the specified number of levels. Defaults to 1.
@@ -171,7 +172,7 @@ function logs() {
 # For example, nnnnnnnnnn@messaging.sprintpcs.com
 function notify() {
   # NOTE!!! Set mail var to desired list of email addresses.
-  mail="nkilleen@castlighthealth.com"
+  mail="nkilleen@gmail.com"
   str1="`history 1 | cut -b 8-`"
   str2="${str1%;*}"
   echo ${str2} | mail -s CMD_FINISH ${mail}
@@ -347,7 +348,7 @@ ZSH_THEME="flazz"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git theme tmux)
+plugins=(git tmux)
 
 # User configuration
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -361,7 +362,7 @@ fi
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
-export EDITOR='vim'
+export EDITOR='nvr'
 # else
 #   export EDITOR='mvim'
 # fi
@@ -384,5 +385,17 @@ export EDITOR='vim'
 export PATH="/usr/local/opt/node@6/bin:$PATH"
 export PATH="/usr/local/opt/percona-server@5.6/bin:$PATH"
 export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
+export PATH="/usr/local/opt/mysql@5.7/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="$HOME/.gem/ruby/2.1.0/bin:$PATH"
+export PATH="$HOME/.gem/ruby/2.2.0/bin:$PATH"
+export PATH="/usr/local/bin:$PATH"
+export PATH="$HOME/.rbenv/shims:$PATH"
+which npm > /dev/null && export PATH="$(npm config get prefix)/bin:$PATH"
 echo ".zshrc loaded"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/usr/local/opt/nvm/etc/bash_completion" ] && . "/usr/local/opt/nvm/etc/bash_completion"  # This loads nvm bash_completion
