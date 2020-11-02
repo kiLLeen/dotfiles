@@ -4,52 +4,46 @@
 "                                preamble                                 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-"set shell=/usr/local/bin/zsh\ --rcs
-set shell=/bin/sh
+set shell=/usr/local/bin/zsh\ --rcs
+"set shell=/bin/sh
+
+if has('nvim')
+  let $GIT_EDITOR = 'nvr -cc split --remote-wait'
+endif
 
 " Needed for vundle, will be turned on after vundle inits
 set nocompatible
 filetype off
 
-" Setup vundle
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+packadd minpac
+if exists('*minpac#init')
+  call minpac#init()
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"                          Vundle configuration                           "
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" These need to come before the configuration options for the plugins since
-" vundle will add the plugin folders to the runtimepath only after it has seen
-" the plugin's Plugin command.
+  call minpac#add('altercation/vim-colors-solarized')
+  call minpac#add('jeffkreeftmeijer/vim-numbertoggle')
+  call minpac#add('preservim/tagbar')
+  call minpac#add('tpope/vim-fugitive')
+  call minpac#add('tpope/vim-repeat')
+  call minpac#add('tpope/vim-vinegar')
+  call minpac#add('tpope/vim-bundler')
+  call minpac#add('tpope/vim-projectionist')
+  call minpac#add('tpope/vim-surround')
+  call minpac#add('tpope/vim-haml')
+  call minpac#add('tpope/vim-rails')
+  call minpac#add('tpope/vim-dispatch')
+  call minpac#add('junegunn/fzf', { 'dir': '~/.fzf', 'do': {-> system('./install --all')} })
+  call minpac#add('junegunn/fzf.vim')
+  call minpac#add('scrooloose/nerdtree')
+  call minpac#add('vim-ruby/vim-ruby')
+  call minpac#add('leafgarland/typescript-vim')
+  call minpac#add('jremmen/vim-ripgrep')
+  call minpac#add('HerringtonDarkholme/yats.vim')
+  call minpac#add('ycm-core/YouCompleteMe', { 'do': {-> system('python3 install.py --all')} })
 
-Plugin 'gmarik/Vundle.vim'
-"Plugin 'vim-scripts/taglist.vim'
-"Plugin 'bling/vim-airline'
-"Plugin 'SirVer/ultisnips'
-Plugin 'altercation/vim-colors-solarized'
-Plugin 'jeffkreeftmeijer/vim-numbertoggle'
-"Plugin 'nathanaelkane/vim-indent-guides'
-"Plugin 'Valloric/YouCompleteMe'
-"Plugin 'fatih/vim-go'
-"Plugin 'majutsushi/tagbar'
-"Plugin 'mileszs/ack.vim'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-repeat'
-Plugin 'tpope/vim-vinegar'
-Plugin 'tpope/vim-bundler'
-Plugin 'tpope/vim-projectionist'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-haml'
-Plugin 'tpope/vim-rails'
-Plugin 'kien/ctrlp.vim'
-Plugin 'scrooloose/nerdtree'
-Plugin 'vim-ruby/vim-ruby'
-Plugin 'leafgarland/typescript-vim'
-Plugin 'nixprime/cpsm'
-Plugin 'jremmen/vim-ripgrep'
-
-call vundle#end()
-filetype plugin indent on
+  command! PackUpdate packadd minpac | source $MYVIMRC | call minpac#update('', {'do': 'call minpac#status()'})
+  command! PackClean  packadd minpac | source $MYVIMRC | call minpac#clean()
+  command! PackStatus packadd minpac | source $MYVIMRC | call minpac#status()
+endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                           reset vimrc augroup                           "
@@ -65,6 +59,7 @@ augroup vimrc
   autocmd bufwritepost vimrc source $MYVIMRC
   " Stop that dumb autocommenting
   autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+  autocmd vimrc GUIEnter * set visualbell t_vb=
 augroup END
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -72,7 +67,7 @@ augroup END
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Enable detection, plugins and indenting in one step
-" This needs to come AFTER the Plugin commands!
+" This needs to come AFTER the call minpac#add('commands!
 filetype plugin indent on
 syntax on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -145,7 +140,6 @@ set undolevels=1000     " use many levels of undo
 set autoread            " auto read when a file is changed from the outside
 set mouse=a             " enables the mouse in all modes
 set foldlevelstart=99   " all folds open by default
-set noesckeys           " after esc is hit don't wait for modifier (arrow keys don't work in insert mode)
 set ttimeoutlen=100     " timeout for a keycode delay (speeds up esc + shift + o)
 
 " toggles vim's paste mode; when we want to paste something into vim from a
@@ -189,7 +183,6 @@ nnoremap <c-tab> :tabn<CR>
 
 " turns off all error bells, visual or otherwise
 set noerrorbells visualbell t_vb=
-autocmd vimrc GUIEnter * set visualbell t_vb=
 
 " Switch syntax highlighting on, when the terminal has colors
 if &t_Co > 2 || has("gui_running")
@@ -222,9 +215,19 @@ set formatoptions=tcroqnj
 
 set clipboard=unnamed
 
-" Relative paths in insert mode (doesn't always work)
-"autocmd InsertEnter * let save_cwd = getcwd() | set autochdir
-"autocmd InsertLeave * set noautochdir | execute 'cd' fnameescape(save_cwd)
+" Relative paths in insert mode
+augroup relative_paths
+  autocmd!
+  autocmd InsertEnter * let save_cwd = getcwd() | setlocal autochdir
+  autocmd InsertLeave * setlocal noautochdir | execute 'cd' fnameescape(save_cwd)
+augroup END
+
+" Terminal config
+if has('nvim')
+  tnoremap <Esc> <C-\><C-n>
+  tnoremap <M-[> <Esc>
+  tnoremap <C-v><Esc> <Esc>
+endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                            custom mappings                              "
@@ -260,11 +263,29 @@ let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_min_num_identifier_candidate_chars = 4
 let g:ycm_filetype_specific_completion_to_disable = {'javascript': 1}
 let g:ycm_collect_identifiers_for_tags_file = 1
+let g:ycm_disable_for_files_larger_than_kb = 0
 
-nnoremap <leader>y :YcmForceCompileAndDiagnostics<cr>
-nnoremap <leader>pg :YcmCompleter GoTo<CR>
-nnoremap <leader>pd :YcmCompleter GoToDefinition<CR>
-nnoremap <leader>pc :YcmCompleter GoToDeclaration<CR>
+nnoremap <leader>y :<C-u>YcmForceCompileAndDiagnostics<CR>
+nnoremap <leader>i :<C-u>YcmCompleter OrganizeImports<CR>
+nnoremap <leader>f :<C-u>YcmCompleter FixIt<CR>
+nnoremap <leader>r :<C-u>YcmCompleter RefactorRename 
+nnoremap <M-]> :<C-u>YcmCompleter GoTo<CR>
+nnoremap <C-M-]> :<C-u>YcmCompleter GoToReferences<CR>
+
+" YouCompleteMe custom Java and JDTLS config
+"
+"let g:ycm_java_jdtls_workspace_root_path='/Users/nkilleen/eclipse-workspace'
+"let g:ycm_java_jdtls_use_clean_workspace=0
+"let g:ycm_java_binary_path='/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home/bin/'
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"                                  Rg                                     "
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+nnoremap <leader>g :<C-u>Rg '' -t %:e<Left><Left><Left><Left><Left><Left><Left><Left>
+nnoremap <leader>h :<C-u>Rg '<c-r>=expand("<cword>")<cr>' -t %:e<CR>
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                tagbar                                   "
@@ -314,38 +335,34 @@ let g:UltiSnipsJumpBackwardTrigger = "<c-a>"
 let g:snips_author                 = 'Neil Killeen'
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"                                Eclim                                    "
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:EclimCompletionMethod = 'omnifunc'
-nnoremap <leader>i :JavaImportO<cr>
-nnoremap <leader>d :JavaDocSearch -x declarations<cr>
-nnoremap <silent> <buffer> <cr> :JavaSearchContext<cr>
-nnoremap <leader>r :JavaRename 
-nnoremap <leader>m :JavaMove 
-nnoremap <leader>g :JavaGet<cr>
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                             NumberToggle                                "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:NumberToggleTrigger="<F2>"
 
-" Control P
-let g:ctrlp_working_path_mode = 0
-let g:ctrlp_user_command = 'rg %s --files --color=never --glob ""'
-let g:ctrlp_match_func = { 'match': 'cpsm#CtrlPMatch' }
-let g:ctrlp_use_caching = 0
-let g:ctrlp_custom_ignore = '\v[\/]\.(git|jar|min\.js|class)$'
-let g:ctrlp_max_depth = 40
-let g:ctrlp_max_files = 0
+" FZF
+nnoremap <C-p> :<C-u>FZF<CR>
+let g:fzf_buffers_jump = 0
+
+" TagBar
+nnoremap <C-o> :<C-u>TagbarToggle<CR>
+
+"Rg
+let g:rg_command = 'rg --color=never --glob "!*.jar" --glob "!**/*.jar" --glob "!sources" --glob "!tags" --vimgrep'
 
 " Visual effects
 set lazyredraw
-autocmd InsertEnter * set cul
-autocmd InsertLeave * set nocul
+augroup cursor_line
+  autocmd!
+  autocmd InsertEnter * set cul
+  autocmd InsertLeave * set nocul
+augroup END
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                             Custom Binds                                "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"Fugitive
+nnoremap <leader>s :Gstatus<CR>
 
 "NERDTree
 
@@ -359,11 +376,36 @@ let g:airline_right_sep = ""
 let g:airline#extensions#tabline#left_sep = ""
 let g:airline_theme = "dark"
 
+"Java
+
 "Ruby
 let g:rubycomplete_buffer_loading = 1
 let g:rubycomplete_classes_in_global = 1
 let g:rubycomplete_rails = 1
 let g:rubycomplete_load_gemfile = 1
 
-autocmd Filetype ruby setlocal ts=2 sts=2 sw=2
-autocmd Filetype java setlocal ts=3 sts=3 sw=3
+"typescript
+let g:typescript_compiler_binary = 'tsc'
+let g:typescript_compiler_options = ''
+let g:typescript_indent_disable = 1
+
+augroup formatting
+  autocmd!
+  autocmd Filetype java setlocal ts=3 sts=3 sw=3
+  autocmd Filetype ruby setlocal ts=2 sts=2 sw=2
+augroup END
+
+augroup makeprograms
+  autocmd!
+  autocmd FileType ruby setlocal makeprg=bin/rake
+  autocmd FileType typescript setlocal makeprg=tsc
+  autocmd FileType java setlocal makeprg=gradlew\ $*build
+augroup END
+
+augroup gradle_test
+  autocmd!
+  command! -nargs=? TF split | te gradlew :<args>:test --tests "%:t:r*"
+augroup END
+
+" nvr :wq deletes buffer
+autocmd FileType gitcommit,gitrebase,gitconfig set bufhidden=delete
