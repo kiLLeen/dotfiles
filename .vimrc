@@ -37,7 +37,7 @@ call minpac#add('vim-ruby/vim-ruby')
 call minpac#add('leafgarland/typescript-vim')
 call minpac#add('jremmen/vim-ripgrep')
 call minpac#add('HerringtonDarkholme/yats.vim')
-call minpac#add('ycm-core/YouCompleteMe', { 'do': {-> system('python3 install.py --all')} })
+call minpac#add('ycm-core/YouCompleteMe', { 'do': {-> system('python3 install.py --java-completer --ts-completer')} })
 
 command! PackUpdate packadd minpac | source $MYVIMRC | call minpac#update('', {'do': 'call minpac#status()'})
 command! PackClean  packadd minpac | source $MYVIMRC | call minpac#clean()
