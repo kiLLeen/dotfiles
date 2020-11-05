@@ -37,7 +37,7 @@ call minpac#add('vim-ruby/vim-ruby')
 call minpac#add('leafgarland/typescript-vim')
 call minpac#add('jremmen/vim-ripgrep')
 call minpac#add('HerringtonDarkholme/yats.vim')
-call minpac#add('ycm-core/YouCompleteMe', { 'do': {-> system('python3 install.py --java-completer --ts-completer')} })
+call minpac#add('ycm-core/YouCompleteMe', { 'do': {-> system('python3 install.py --all')} })
 
 command! PackUpdate packadd minpac | source $MYVIMRC | call minpac#update('', {'do': 'call minpac#status()'})
 command! PackClean  packadd minpac | source $MYVIMRC | call minpac#clean()
@@ -397,7 +397,7 @@ augroup makeprograms
   autocmd!
   autocmd FileType ruby setlocal makeprg=bin/rake
   autocmd FileType typescript setlocal makeprg=tsc
-  autocmd FileType java setlocal makeprg=gradlew\ $*build
+  autocmd FileType java setlocal makeprg=gradlew\ $*
 augroup END
 
 augroup gradle_test
