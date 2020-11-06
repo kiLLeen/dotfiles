@@ -339,10 +339,11 @@ let g:NumberToggleTrigger="<F2>"
 
 " FZF
 nnoremap <C-p> :<C-u>FZF<CR>
+nnoremap <C-o> :<C-u>Tags<CR>
 let g:fzf_buffers_jump = 0
 
 " TagBar
-nnoremap <C-o> :<C-u>TagbarToggle<CR>
+nnoremap <C-i> :<C-u>TagbarToggle<CR>
 
 "Rg
 let g:rg_command = 'rg --color=never --glob "!*.jar" --glob "!**/*.jar" --glob "!sources" --glob "!tags" --vimgrep'
