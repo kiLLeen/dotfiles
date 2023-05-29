@@ -5,24 +5,24 @@ export ECLIPSE_HOME=/Applications/eclipse
 export SOAS_HOME=~/Projects/Ventana/soa-systems
 export SERVICE_CONFIGURATION_DIR=~/Projects/Ventana/service_configuration
 export APP_SCRIPTS_HOME=~/Projects/Ventana/app_scripts
+export GOOGLE_APPLICATION_CREDENTIALS=/Users/nkilleen/.pricing-ext-sa.json
 which /usr/libexec/java_home && export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 which /usr/libexec/java_home && export JAVA11_HOME=$(/usr/libexec/java_home -v 11)
 export CLH_ENV=development
 export ENCRYPT_KEY=TBUCVEXFYG2J3K4N6P7Q9SATBV
+export GROOVY_HOME=/usr/local/opt/groovy/libexec
 
 export PATH=$PATH:$SOAS_HOME/sysdefs/bin:$APP_SCRIPTS_HOME/build:$APP_SCRIPTS_HOME/ops:$APP_SCRIPTS_HOME/build
-
+export OVERRIDE_DB='release_corvus1'
+export OVERRIDE_HOST='den-gpp-nonphi-zap-master-vip.ch.int'
+export OVERRIDE_PASSWORD='xu8n2hydlp9'
 
 # Prevent Java 7 from launching undesired windows
 export JAVA_OPTS="-Djava.awt.headless=true"
 
 
 # Set up environment variables for Castlight Java development
-if [ -d "$SOAS_HOME" ]; then
-  pushd $SOAS_HOME
-  source castlight_env.sh
-  popd
-fi
+if [ -d "$SOAS_HOME" ]; then; pushd $SOAS_HOME; source castlight_env.sh; popd; fi
 
 
 export USE_ARTIFACTORY=1

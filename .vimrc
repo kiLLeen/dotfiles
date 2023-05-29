@@ -4,22 +4,32 @@
 "                                preamble                                 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-set shell=/usr/local/bin/zsh\ --rcs
-"set shell=/bin/sh
+if filereadable('/usr/local/bin/zsh')
+  set shell=/usr/local/bin/zsh\ --rcs
+endif
 
 if has('nvim')
   let $GIT_EDITOR = 'nvr -cc split --remote-wait'
 endif
 
-" Needed for vundle, will be turned on after vundle inits
+set encoding=utf-8
+
 set nocompatible
 filetype off
+
+if filereadable($HOME.'/.pyenv/versions/neovim2/bin/python')
+  let g:python_host_prog = $HOME.'/.pyenv/versions/neovim2/bin/python'
+endif
+if filereadable($HOME.'/.pyenv/versions/neovim3/bin/python')
+  let g:python3_host_prog = $HOME.'/.pyenv/versions/neovim3/bin/python'
+endif
+let g:vimspector_enable_mappings = 'HUMAN'
 
 packadd minpac
 call minpac#init()
 
+call minpac#add('lifepillar/vim-solarized8')
 call minpac#add('altercation/vim-colors-solarized')
-call minpac#add('jeffkreeftmeijer/vim-numbertoggle')
 call minpac#add('preservim/tagbar')
 call minpac#add('tpope/vim-fugitive')
 call minpac#add('tpope/vim-repeat')
@@ -30,6 +40,7 @@ call minpac#add('tpope/vim-surround')
 call minpac#add('tpope/vim-haml')
 call minpac#add('tpope/vim-rails')
 call minpac#add('tpope/vim-dispatch')
+call minpac#add('tpope/vim-unimpaired')
 call minpac#add('junegunn/fzf', { 'dir': '~/.fzf', 'do': {-> system('./install --all')} })
 call minpac#add('junegunn/fzf.vim')
 call minpac#add('scrooloose/nerdtree')
@@ -37,7 +48,11 @@ call minpac#add('vim-ruby/vim-ruby')
 call minpac#add('leafgarland/typescript-vim')
 call minpac#add('jremmen/vim-ripgrep')
 call minpac#add('HerringtonDarkholme/yats.vim')
+call minpac#add('SirVer/ultisnips')
+call minpac#add('honza/vim-snippets')
 call minpac#add('ycm-core/YouCompleteMe', { 'do': {-> system('python3 install.py --all')} })
+call minpac#add('puremourning/vimspector')
+"call minpac#add('mfussenegger/nvim-dap') " Another debug adapter to try someday
 
 command! PackUpdate packadd minpac | source $MYVIMRC | call minpac#update('', {'do': 'call minpac#status()'})
 command! PackClean  packadd minpac | source $MYVIMRC | call minpac#clean()
@@ -49,16 +64,16 @@ command! PackStatus packadd minpac | source $MYVIMRC | call minpac#status()
 
 " We reset the vimrc augroup. Autocommands are added to this group throughout
 " the file
-augroup vimrc
-  autocmd!
-  " Return to last edit position when opening files (You want this!)
-  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
-  " Source the vimrc file after saving it
-  autocmd bufwritepost vimrc source $MYVIMRC
-  " Stop that dumb autocommenting
-  autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-  autocmd vimrc GUIEnter * set visualbell t_vb=
-augroup END
+"augroup vimrc
+"  autocmd!
+"  " Return to last edit position when opening files (You want this!)
+"  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+"  " Source the vimrc file after saving it
+"  autocmd bufwritepost vimrc source $MYVIMRC
+"  " Stop that dumb autocommenting
+"  autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+"  autocmd vimrc GUIEnter * set visualbell t_vb=
+"augroup END
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                        turn on filetype plugins                         "
@@ -84,7 +99,7 @@ set undofile            " stores undo state even when files are closed (in undod
 set cursorline          " highlights the current line
 set winaltkeys=no       " turns of the Alt key bindings to the gui menu
 set number              " show line numbers
-set relativenumber      " show line numbers relative to current line
+set norelativenumber    " show line numbers absolute
 set guifont=PragmataPro:h14
 
 " When you type the first tab, it will complete as much as possible, the second
@@ -165,7 +180,7 @@ let g:is_posix = 1
 " tries to avoid those annoying "hit enter to continue" messages
 " if it still doesn't help with certain commands, add a second <cr>
 " at the end of the map command
-set shortmess=a
+set shortmess=ac
 
 " this solves the "unable to open swap file" errors on Win7
 set dir=~/tmp,/var/tmp,/tmp,$TEMP
@@ -214,15 +229,16 @@ set formatoptions=tcroqnj
 set clipboard=unnamed
 
 " Relative paths in insert mode
-augroup relative_paths
-  autocmd!
-  autocmd InsertEnter * let save_cwd = getcwd() | setlocal autochdir
-  autocmd InsertLeave * setlocal noautochdir | execute 'cd' fnameescape(save_cwd)
-augroup END
+"augroup relative_paths
+"  autocmd!
+"  autocmd InsertEnter * let save_cwd = getcwd() | setlocal autochdir
+"  autocmd InsertLeave * setlocal noautochdir | execute 'cd' fnameescape(save_cwd)
+"augroup END
 
 " Terminal config
 if has('nvim')
-  tnoremap <Esc> <C-\><C-n>
+  au TermOpen * tnoremap <buffer> <Esc> <C-\><C-n>
+  au FileType fzf tunmap <buffer> <Esc>
   tnoremap <M-[> <Esc>
   tnoremap <C-v><Esc> <Esc>
 endif
@@ -246,27 +262,36 @@ map <c-w>t :$tabedit <c-r>%<cr>
 "                                Solarized                                "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let g:solarized_visibility="high"
-let g:solarized_termcolors=256
-let g:solarized_contrast="high"
-let g:solarized_termtrans=1
-let g:solarized_hitrail=1
-colorscheme solarized
+"let g:solarized_visibility="high"
+"let g:solarized_termcolors=16
+"let g:solarized_contrast="high"
+"let g:solarized_termtrans=1
+"let g:solarized_hitrail=1
+"colorscheme solarized
+let g:solarized_use16=1
+colorscheme solarized8
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                              YouCompleteMe                              "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+let g:ycm_always_populate_location_list = 1
 let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_min_num_identifier_candidate_chars = 4
+let g:ycm_min_num_identifier_candidate_chars = 1
 let g:ycm_filetype_specific_completion_to_disable = {'javascript': 1}
 let g:ycm_collect_identifiers_for_tags_file = 1
 let g:ycm_disable_for_files_larger_than_kb = 0
+if executable('which') && !empty(trim(system('which brew'))) && !empty(trim(system('brew --prefix openjdk@17')))
+  let g:ycm_java_binary_path = trim(system('brew --prefix openjdk@17')).'/bin/java'
+elseif executable('readlink') && executable('update-alternatives') && executable('grep') && executable('awk')
+  let g:ycm_java_binary_path = trim(system('readlink -f $(update-alternatives --query java | grep "Value: " | awk \'{print $2}\')'))
+endif
 
 nnoremap <leader>y :<C-u>YcmForceCompileAndDiagnostics<CR>
 nnoremap <leader>i :<C-u>YcmCompleter OrganizeImports<CR>
 nnoremap <leader>f :<C-u>YcmCompleter FixIt<CR>
 nnoremap <leader>r :<C-u>YcmCompleter RefactorRename 
+nnoremap <leader>d :<C-u>YcmCompleter GetDoc<CR>
 nnoremap <M-]> :<C-u>YcmCompleter GoTo<CR>
 nnoremap <C-M-]> :<C-u>YcmCompleter GoToReferences<CR>
 
@@ -289,11 +314,11 @@ nnoremap <leader>h :<C-u>Rg '<c-r>=expand("<cword>")<cr>' -t %:e<CR>
 "                                tagbar                                   "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let g:tagbar_left = 1
-let g:tagbar_sort = 0
-let g:tagbar_ctags_bin = '/usr/local/bin/ctags'
-
-nnoremap <F4> :TagbarToggle<cr><c-w>=
+"let g:tagbar_left = 1
+"let g:tagbar_sort = 0
+"let g:tagbar_ctags_bin = '/usr/local/bin/ctags'
+"
+"nnoremap <F4> :TagbarToggle<cr><c-w>=
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                ack.vim                                  "
@@ -307,20 +332,20 @@ endif
 "                                go-vim                                   "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-au vimrc FileType go nmap <Leader>gs <Plug>(go-implements)
-au vimrc FileType go nmap <Leader>gi <Plug>(go-info)
-au vimrc FileType go nmap <Leader>gd <Plug>(go-doc) 
-au vimrc FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
-au vimrc FileType go nmap <Leader>gb <Plug>(go-doc-browser)
-au vimrc FileType go nmap <leader>gr <Plug>(go-run)
-au vimrc FileType go nmap <leader>gb <Plug>(go-build)
-au vimrc FileType go nmap <leader>gt <Plug>(go-test)
-au vimrc FileType go nmap <leader>gc <Plug>(go-coverage)
-au vimrc FileType go nmap <leader>gd <Plug>(go-def)
-au vimrc FileType go nmap <Leader>ds <Plug>(go-def-split)
-au vimrc FileType go nmap <Leader>dv <Plug>(go-def-vertical)
-au vimrc FileType go nmap <Leader>dt <Plug>(go-def-tab)
-au vimrc FileType go nmap <Leader>ge <Plug>(go-rename)
+"au vimrc FileType go nmap <Leader>gs <Plug>(go-implements)
+"au vimrc FileType go nmap <Leader>gi <Plug>(go-info)
+"au vimrc FileType go nmap <Leader>gd <Plug>(go-doc) 
+"au vimrc FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
+"au vimrc FileType go nmap <Leader>gb <Plug>(go-doc-browser)
+"au vimrc FileType go nmap <leader>gr <Plug>(go-run)
+"au vimrc FileType go nmap <leader>gb <Plug>(go-build)
+"au vimrc FileType go nmap <leader>gt <Plug>(go-test)
+"au vimrc FileType go nmap <leader>gc <Plug>(go-coverage)
+"au vimrc FileType go nmap <leader>gd <Plug>(go-def)
+"au vimrc FileType go nmap <Leader>ds <Plug>(go-def-split)
+"au vimrc FileType go nmap <Leader>dv <Plug>(go-def-vertical)
+"au vimrc FileType go nmap <Leader>dt <Plug>(go-def-tab)
+"au vimrc FileType go nmap <Leader>ge <Plug>(go-rename)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                UltiSnips                                "
@@ -338,12 +363,14 @@ let g:snips_author                 = 'Neil Killeen'
 let g:NumberToggleTrigger="<F2>"
 
 " FZF
-nnoremap <C-p> :<C-u>FZF<CR>
-nnoremap <C-o> :<C-u>Tags<CR>
-let g:fzf_buffers_jump = 0
+nnoremap <silent> <C-p> :<C-u>Files<CR>
+nnoremap <silent> <A-p> :<C-u>Buffers<CR>
+nnoremap <silent> <A-o> :<C-u>Tags<CR>
+let g:fzf_buffers_jump = 1
 
 " TagBar
-nnoremap <C-i> :<C-u>TagbarToggle<CR>
+" <M-tab> defaults to TagbarToggle
+nnoremap <C-tab> :<C-u>TagbarToggle<CR>
 
 "Rg
 let g:rg_command = 'rg --color=never --glob "!*.jar" --glob "!**/*.jar" --glob "!sources" --glob "!tags" --vimgrep'
@@ -361,11 +388,12 @@ augroup END
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 "Fugitive
-nnoremap <leader>s :Gstatus<CR>
+nnoremap <leader>s :Git<CR>
 
 "NERDTree
 
 nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <M-n> :NERDTreeFind<CR>
 
 "Airline
 
@@ -398,13 +426,52 @@ augroup makeprograms
   autocmd!
   autocmd FileType ruby setlocal makeprg=bin/rake
   autocmd FileType typescript setlocal makeprg=tsc
-  autocmd FileType java setlocal makeprg=gradlew\ $*
+  autocmd FileType java setlocal makeprg=$(git\ rev-parse\ --show-toplevel)/gradlew\ $*
 augroup END
 
-augroup gradle_test
+augroup gradle
   autocmd!
-  command! -nargs=? TF split | te gradlew :<args>:test --tests "%:t:r*"
+  "Version 1: Requires one to specify the project within the current working directory
+  "command! -nargs=? TF split | te gradlew :<args>:test --tests "%:t:r*"
+  "Version 2: Uses the current file to determine the closest parent project
+  command! TestFile split | execute "make test --project-dir " . fnamemodify(getcwd() . "/" . findfile('build.gradle', '.;'), ':p:h') . " --tests \"%:t:r*\""
+  command! TF TestFile
+  command! TestProject split | execute "make test --project-dir " . fnamemodify(getcwd() . "/" . findfile('build.gradle', '.;'), ':p:h')
+  command! TP TestProject
+  command! BuildProject split | execute "make build --project-dir " . fnamemodify(getcwd() . "/" . findfile('build.gradle', '.;'), ':p:h')
+  command! BP BuildProject
+augroup END
+
+function s:createJavaTest()
+  if expand("%:e") == "java"
+    let currentDirectory = expand("%:p:h")
+    let currentFileNameWithoutExtension = expand("%:t:r")
+    let destinationDirectory = substitute(currentDirectory, "\/src\/main", "\/src\/test", "g")
+    call mkdir(destinationDirectory, "p")
+    execute "vsplit | edit " . destinationDirectory . "/" . currentFileNameWithoutExtension . "Test.java"
+  else
+    echoerr "Can only create a test for java files."
+  endif 
+endfunction
+
+augroup createJavaTest
+  autocmd!
+  autocmd FileType java command! TestCreate call s:createJavaTest()
+  autocmd FileType java command! TC TestCreate
+  autocmd FileType java command! TestEdit TestCreate
+  autocmd FileType java command! TE TestCreate
 augroup END
 
 " nvr :wq deletes buffer
 autocmd FileType gitcommit,gitrebase,gitconfig set bufhidden=delete
+
+" mnemonic 'di' = 'debug inspect' (pick your own, if you prefer!)
+
+" for normal mode - the word under the cursor
+nmap <Leader>di <Plug>VimspectorBalloonEval
+" for visual mode, the visually selected text
+xmap <Leader>di <Plug>VimspectorBalloonEval
+nmap <LocalLeader><F11> <Plug>VimspectorUpFrame
+nmap <LocalLeader><F12> <Plug>VimspectorDownFrame
+nmap <LocalLeader>B     <Plug>VimspectorBreakpoints
+nmap <LocalLeader>D     <Plug>VimspectorDisassemble

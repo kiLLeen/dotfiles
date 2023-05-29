@@ -7,10 +7,23 @@ source $HOME/.zprofile
 #  PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D" | tr -d %) "$PWD")'
 #fi
 
-# don't put dupliacate lines or lines that start with a blank space in the history. See bash(1)
+export PROMPT='%(?.%F{green}√.%F{red}?%?)%f %B%F{32}%3~%f%b %# '
+autoload -Uz vcs_info
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+setopt prompt_subst
+export RPROMPT=\$vcs_info_msg_0_
+zstyle ':vcs_info:git:*' formats '%F{32}(%b) %r%f'
+zstyle ':vcs_info:*' enable git
+
+# don't put duplicate lines or lines that start with a blank space in the history. See bash(1)
+export HISTFILE=~/.zsh_history
 export HISTCONTROL=ignoreboth
-export HISTSIZE=10000
-export HISTFILESIZE=10000
+export HISTSIZE=100000
+export HISTFILESIZE=100000
+export SAVEHIST=100000
+setopt SHARE_HISTORY
+setopt HIST_FIND_NO_DUPS
 
 #-----------------------------------
 # Portable Aliases
@@ -18,8 +31,8 @@ export HISTFILESIZE=10000
 
 alias grep='grep --color'
 alias l='ls -lh'
-alias ls='ls -HF'
-alias la='ls -ah'
+alias ls='ls -lGHFah'
+alias la='ls -lGah'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias h='history'
@@ -382,6 +395,7 @@ export EDITOR='nvr'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+export PATH="/usr/local/opt/postgresql@9.4/bin:$PATH"
 export PATH="/usr/local/opt/node@6/bin:$PATH"
 export PATH="/usr/local/opt/percona-server@5.6/bin:$PATH"
 export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
@@ -392,10 +406,28 @@ export PATH="$HOME/.gem/ruby/2.2.0/bin:$PATH"
 export PATH="/usr/local/bin:$PATH"
 export PATH="$HOME/.rbenv/shims:$PATH"
 which npm > /dev/null && export PATH="$(npm config get prefix)/bin:$PATH"
+
+which brew > /dev/null && export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.0)"
+
 echo ".zshrc loaded"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/usr/local/opt/nvm/etc/bash_completion" ] && . "/usr/local/opt/nvm/etc/bash_completion"  # This loads nvm bash_completion
+export PATH="/usr/local/opt/curl/bin:$PATH"
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f "$HOME/Downloads/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/Downloads/google-cloud-sdk/path.zsh.inc"; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc"; fi
+#
+export PATH="/usr/local/opt/mongodb-community@4.0/bin:$PATH"
+export PATH="/usr/local/opt/mongodb-community@5.0/bin:$PATH"
+
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"

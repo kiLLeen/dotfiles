@@ -7,16 +7,15 @@ function new_session_if_not_exists {
 }
 
 new_session_if_not_exists soa-systems
-new_session_if_not_exists pdpipeline
-new_session_if_not_exists providerdirectory
-new_session_if_not_exists web
-new_session_if_not_exists mobile
-new_session_if_not_exists clh-soa-client
-new_session_if_not_exists service_config
-new_session_if_not_exists vm
+new_session_if_not_exists indexing-service
+new_session_if_not_exists providerdirectory-service
+new_session_if_not_exists service_configuration
 new_session_if_not_exists soa-common
-new_session_if_not_exists pantry
-new_session_if_not_exists config
-new_session_if_not_exists mongos
+new_session_if_not_exists pricing-airflow
+new_session_if_not_exists dataenv
+new_session_if_not_exists pyrevenge
+new_session_if_not_exists ikkuna
+new_session_if_not_exists phoenix
+new_session_if_not_exists vm
 
 [[ -z "$TMUX" ]] && tmux attach
