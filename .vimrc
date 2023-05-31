@@ -28,6 +28,7 @@ let g:vimspector_enable_mappings = 'HUMAN'
 packadd minpac
 call minpac#init()
 
+call minpac#add('sheerun/vim-polyglot')
 call minpac#add('lifepillar/vim-solarized8')
 call minpac#add('altercation/vim-colors-solarized')
 call minpac#add('preservim/tagbar')
@@ -186,6 +187,11 @@ set shortmess=ac
 set dir=~/tmp,/var/tmp,/tmp,$TEMP
 set undodir=~/tmp,/var/tmp,/tmp,$TEMP
 
+
+if system('uname -r') =~ 'Microsoft'
+  set path+=**
+endif
+
 " Look for tag def in a "tags" file in the dir of the current file, then for
 " that same file in every folder above the folder of the current file, until the
 " root.
@@ -227,6 +233,20 @@ set colorcolumn=+1
 set formatoptions=tcroqnj
 
 set clipboard=unnamed
+if system('uname -r') =~ 'Microsoft'
+  let g:clipboard = {
+    \   'name': 'WslClipboard',
+    \   'copy': {
+    \      '+': 'clip.exe',
+    \      '*': 'clip.exe',
+    \    },
+    \   'paste': {
+    \      '+': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    \      '*': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    \   },
+    \   'cache_enabled': 0,
+    \ }
+endif
 
 " Relative paths in insert mode
 "augroup relative_paths
@@ -263,13 +283,42 @@ map <c-w>t :$tabedit <c-r>%<cr>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 "let g:solarized_visibility="high"
-"let g:solarized_termcolors=16
 "let g:solarized_contrast="high"
 "let g:solarized_termtrans=1
 "let g:solarized_hitrail=1
-"colorscheme solarized
+if system('uname -r') =~ 'Microsoft'
+  set t_Co=16
+endif
 let g:solarized_use16=1
 colorscheme solarized8
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"                                   Coc                                   "
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"nnoremap <leader>y :<C-u>CocCommand java.workspace.compile<CR>
+"nnoremap <leader>i :<C-u>CocCommand java.action.organizeImports<CR>
+"nnoremap <leader>f :<C-u>CocFix<CR>
+"nnoremap <leader>r :<C-u>YcmCompleter RefactorRename 
+"nnoremap <M-]> :<C-u>YcmCompleter GoTo<CR>
+"nnoremap <C-M-]> :<C-u>YcmCompleter GoToReferences<CR>
+"inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+"augroup CocJava
+" autocmd!
+" autocmd FileType java setlocal keywordprg=:call\ CocActionAsync('doHover')
+"augroup END
+
+
+"if has('nvim-0.4.0') || has('patch-8.2.0750')
+"  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+"  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+"  inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+"  inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+"  vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+"  vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+"endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                              YouCompleteMe                              "
@@ -284,7 +333,7 @@ let g:ycm_disable_for_files_larger_than_kb = 0
 if executable('which') && !empty(trim(system('which brew'))) && !empty(trim(system('brew --prefix openjdk@17')))
   let g:ycm_java_binary_path = trim(system('brew --prefix openjdk@17')).'/bin/java'
 elseif executable('readlink') && executable('update-alternatives') && executable('grep') && executable('awk')
-  let g:ycm_java_binary_path = trim(system('readlink -f $(update-alternatives --query java | grep "Value: " | awk \'{print $2}\')'))
+  let g:ycm_java_binary_path = trim(system("readlink -f $(update-alternatives --query java | grep 'Value: ' | awk \'{print $2}\')"))
 endif
 
 nnoremap <leader>y :<C-u>YcmForceCompileAndDiagnostics<CR>
@@ -316,7 +365,7 @@ nnoremap <leader>h :<C-u>Rg '<c-r>=expand("<cword>")<cr>' -t %:e<CR>
 
 "let g:tagbar_left = 1
 "let g:tagbar_sort = 0
-"let g:tagbar_ctags_bin = '/usr/local/bin/ctags'
+"let g:tagbar_ctags_bin = substitute(system('which ctags'), '\n', '', 'g')
 "
 "nnoremap <F4> :TagbarToggle<cr><c-w>=
 
@@ -376,7 +425,6 @@ nnoremap <C-tab> :<C-u>TagbarToggle<CR>
 let g:rg_command = 'rg --color=never --glob "!*.jar" --glob "!**/*.jar" --glob "!sources" --glob "!tags" --vimgrep'
 
 " Visual effects
-set lazyredraw
 augroup cursor_line
   autocmd!
   autocmd InsertEnter * set cul
@@ -427,6 +475,7 @@ augroup makeprograms
   autocmd FileType ruby setlocal makeprg=bin/rake
   autocmd FileType typescript setlocal makeprg=tsc
   autocmd FileType java setlocal makeprg=$(git\ rev-parse\ --show-toplevel)/gradlew\ $*
+  autocmd FileType puml setlocal makeprg=plantuml
 augroup END
 
 augroup gradle
@@ -475,3 +524,23 @@ nmap <LocalLeader><F11> <Plug>VimspectorUpFrame
 nmap <LocalLeader><F12> <Plug>VimspectorDownFrame
 nmap <LocalLeader>B     <Plug>VimspectorBreakpoints
 nmap <LocalLeader>D     <Plug>VimspectorDisassemble
+
+" Enable YouCompleteMe navigation or fall back to tags navigation
+function! GoToDefinitionOrReferences()
+  if exists(':YcmCompleter')
+    let l:result = execute('YcmCompleter GoToDefinition')
+    if l:result !~# 'RuntimeError.*'
+      return
+    endif
+
+    let l:result = execute('YcmCompleter GoToReferences')
+    if l:result !~# 'RuntimeError.*'
+      return
+    endif
+  endif
+
+  execute 'tjump ' . expand('<cword>')
+endfunction
+
+" Map <C-]> to GoToDefinitionOrReferences silently
+nnoremap <silent> <C-]> :call GoToDefinitionOrReferences()<CR>
