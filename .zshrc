@@ -422,7 +422,7 @@ export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 if [ -f "$HOME/Downloads/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/Downloads/google-cloud-sdk/path.zsh.inc"; fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc"; fi
+#if [ -f "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc"; fi
 #
 export PATH="/usr/local/opt/mongodb-community@4.0/bin:$PATH"
 export PATH="/usr/local/opt/mongodb-community@5.0/bin:$PATH"
